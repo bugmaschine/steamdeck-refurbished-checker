@@ -1,6 +1,6 @@
 name: run main.py
 
-on:
+# on:
   # schedule:
   #   - cron: '*/3 * * * *' #15min interval
 
