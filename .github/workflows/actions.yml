@@ -26,6 +26,8 @@ jobs:
 
       - name: execute py script # run check.py
         run: python checker.py
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
 
       - uses: stefanzweifel/git-auto-commit-action@v5
         with:
