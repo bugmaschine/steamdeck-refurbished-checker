@@ -53,6 +53,7 @@ if (__name__ == "__main__"):
     # get webhook from env
     webhook_url = os.getenv('DISCORD_WEBHOOK')
     if webhook_url == None:
+        print("Webhook url not set")
         os._exit(1)
     # we have to set this here so we can send stuff
     webhook = DiscordWebhook(url=webhook_url, content="error")
