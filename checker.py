@@ -6,20 +6,22 @@ import os
 
 # The country we want check for availability
 # List of possibilities here https://github.com/RudeySH/SteamCountries/blob/master/json/countries.json
-country_code = 'US'
+country_code = 'DE'
 
 # This is the endpoint to check availability
 url = 'https://api.steampowered.com/IPhysicalGoodsService/CheckInventoryAvailableByPackage/v1?origin=https:%2F%2Fstore.steampowered.com&country_code='+country_code+'&packageid=' #64gb
 
+
 # The webhook we'll send updates to
-webhook = DiscordWebhook(url="https://discord.com/api/webhooks/1168907173670158416/uim-5MWaxZyqDk9jPuZdcmCBjJPDl_4DGyMw7Pp8ZlI7NVbqJgc3cCmNFAkWV1BU33b7", content="error")
+webhook = None
 
 def superduperscraper (version, urlSuffix) :
     oldvalue = ""
     # previous availability is stored in a file
     # we get the value before checking here
-    if (os.path.isfile(version + "us.txt")):
-        file_read = open(version + "us.txt", "r")
+    filename = version + "_" + country_code + ".txt"
+    if (os.path.isfile(filename)):
+        file_read = open(filename, "r")
         oldvalue = file_read.read()
         file_read.close()
     print("ov: "+ oldvalue)
@@ -28,24 +30,36 @@ def superduperscraper (version, urlSuffix) :
     response = requests.get(url+urlSuffix)
     # True / False depending on if it's available or not
     availability = str(response.json()["response"]["inventory_available"])
-    print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " >> "+version+"us Result: " + availability + " | raw: " + str(response.text))
+    print(strftime("%Y-%m-%d %H:%M:%S", gmtime()) + " >> "+version+ "-" + country_code + " Result: " + availability + " | raw: " + str(response.text))
     # save the new availability to the same file as above
-    file = open(version + "us.txt", "w")
+    file = open(filename, "w")
     file.write(availability)
     file.close()
+
+    # maybe move this somewhere else
+
     # if the new availability is different form the old one
     if oldvalue != availability and oldvalue != None :
         # and if it's available send a positive message to discord
         if availability == "True" :
-            webhook.content = "refurbished "+version+"us steam deck available"
+            webhook.content = "refurbished "+version+ "-" + country_code + " steam deck available"
             webhook.execute()
         # if not send a negative message
         else:
-            webhook.content = "refurbished "+version+"us steam deck not available"
+            webhook.content = "refurbished "+version+ "-" + country_code + " steam deck not available"
             webhook.execute()
 
-# The numbers are the individual ids for the refurbished steam deck
-# Got these form steamdb, you can probably add normal steam decks as well
-superduperscraper("64", "903905")
-superduperscraper("256", "903906")
-superduperscraper("512", "903907")
+if (__name__ == "main"):
+    # get webhook from env
+    webhook_url = os.getenv('DISCORD_WEBHOOK')
+    if webhook_url == None:
+        os.exit(1)
+    # we have to set this here so we can send stuff
+    webhook = DiscordWebhook(url=webhook_url, content="error")
+
+
+    # The numbers are the individual ids for the refurbished steam deck
+    # Got these form steamdb, you can probably add normal steam decks as well
+    superduperscraper("64", "903905")
+    superduperscraper("256", "903906")
+    superduperscraper("512", "903907")
