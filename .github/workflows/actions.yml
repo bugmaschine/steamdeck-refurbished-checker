@@ -2,7 +2,7 @@ name: check for refurbished steamdecks
 
 on:
   schedule:
-    - cron: '*/3 * * * *' #15min interval
+    - cron: '*/10 * * * *' #10min interval
 
 jobs:
   build:
